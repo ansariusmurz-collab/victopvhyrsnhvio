@@ -1,0 +1,5548 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Корона | Выпускной 1 класса</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+<style>
+:root{
+    --gold:#FFD700;
+    --gold-light:#FFF2A0;
+    --gold-dark:#B99700;
+    --white:#fff;
+    --muted:#aaa;
+    --dark:#090909;
+    --border:rgba(255,215,0,.25);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+}
+
+body{
+    overflow:hidden;
+    color:var(--white);
+    font-family:Arial,Helvetica,sans-serif;
+
+    /* ФОН НЕ УБИРАЕМ */
+    background:#090909 url("фон.png") center/cover fixed no-repeat;
+}
+
+/* =====================================================
+   CANVAS ФОНА
+===================================================== */
+
+#particlesCanvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+    pointer-events:none;
+}
+
+.background-overlay{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+
+    background:
+        radial-gradient(
+            circle at 50% 10%,
+            rgba(255,215,0,.10),
+            transparent 40%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(0,0,0,.38),
+            rgba(0,0,0,.62)
+        );
+}
+
+/* =====================================================
+   ЦЕНТРАЛЬНОЕ ЛОГО ВО ВРЕМЯ ИГРЫ
+===================================================== */
+
+.center-logo{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    z-index:3;
+    pointer-events:none;
+    opacity:0.5;
+    width:300px;
+    height:300px;
+    display:none;
+}
+
+.center-logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+/* =====================================================
+   ЭКРАНЫ
+===================================================== */
+
+.screen{
+    position:fixed;
+    inset:0;
+    z-index:5;
+
+    display:flex;
+    flex-direction:column;
+
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.screen.active{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+}
+
+/* =====================================================
+   START
+===================================================== */
+
+#startScreen{
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:30px;
+}
+
+.start-logo{
+    width:110px;
+    height:110px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:2px solid var(--gold);
+    border-radius:30px;
+
+    background:rgba(0,0,0,.22);
+
+    box-shadow:
+        0 0 45px rgba(255,215,0,.22),
+        inset 0 0 30px rgba(255,215,0,.08);
+
+    margin-bottom:30px;
+}
+
+.start-logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+.start-title{
+    max-width:1100px;
+
+    color:var(--gold);
+
+    font-size:clamp(38px,5vw,72px);
+    line-height:1.08;
+    font-weight:900;
+
+    text-shadow:
+        0 0 35px rgba(255,215,0,.25);
+}
+
+.start-question{
+    margin-top:22px;
+
+    font-size:clamp(22px,2.5vw,34px);
+    font-weight:700;
+}
+
+.start-buttons{
+    display:flex;
+    gap:25px;
+    margin-top:55px;
+}
+
+.team-start{
+    width:320px;
+
+    padding:23px 35px;
+
+    border:1px solid rgba(255,215,0,.65);
+    border-radius:18px;
+
+    color:#111;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff5bd,
+            #FFD700,
+            #d3a700
+        );
+
+    font-size:21px;
+    font-weight:900;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 15px 55px rgba(255,215,0,.16);
+
+    transition:
+        transform .25s,
+        box-shadow .25s;
+}
+
+.team-start:hover{
+    transform:translateY(-6px);
+
+    box-shadow:
+        0 20px 70px rgba(255,215,0,.32);
+}
+
+.team-start:active{
+    transform:scale(.97);
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header{
+    height:90px;
+    min-height:90px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 5vw;
+
+    border-bottom:1px solid var(--border);
+
+    background:rgba(8,8,8,.72);
+    backdrop-filter:blur(16px);
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.logo-icon{
+    width:44px;
+    height:44px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:2px solid var(--gold);
+    border-radius:12px;
+
+    overflow:hidden;
+}
+
+.logo-icon img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+.logo-name{
+    color:var(--gold);
+
+    font-size:22px;
+    font-weight:900;
+
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+
+.progress{
+    color:var(--muted);
+
+    font-size:16px;
+    font-weight:700;
+}
+
+.progress span{
+    color:var(--gold);
+}
+
+/* =====================================================
+   ХОД
+===================================================== */
+
+.active-team{
+    position:absolute;
+
+    top:110px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    padding:9px 22px;
+
+    border:1px solid var(--border);
+    border-radius:50px;
+
+    color:var(--gold);
+
+    background:rgba(255,215,0,.06);
+
+    font-size:14px;
+    font-weight:900;
+
+    letter-spacing:.12em;
+}
+
+/* =====================================================
+   ОБЛАСТЬ ВОПРОСА
+===================================================== */
+
+.question-area{
+    flex:1;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:70px 6vw 20px;
+}
+
+.question-content{
+    width:min(1350px,94vw);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    gap:70px;
+}
+
+.question-column{
+    flex:1;
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    text-align:center;
+}
+
+.question-label{
+    margin-bottom:15px;
+
+    color:var(--gold);
+
+    font-size:13px;
+    font-weight:900;
+
+    letter-spacing:.25em;
+}
+
+.step-label{
+    margin-bottom:22px;
+
+    color:#ddd;
+
+    font-size:15px;
+    font-weight:800;
+
+    letter-spacing:.1em;
+}
+
+.question-text{
+    width:100%;
+
+    font-size:clamp(29px,3.5vw,56px);
+    line-height:1.16;
+
+    font-weight:900;
+
+    text-wrap:balance;
+
+    text-shadow:
+        0 7px 30px rgba(0,0,0,.55);
+}
+
+/* =====================================================
+   CANVAS ГЕОМЕТРИИ
+===================================================== */
+
+.geometry-column{
+    flex:1;
+
+    min-width:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.geometry-box{
+    position:relative;
+
+    width:min(700px,45vw);
+    aspect-ratio:1.65;
+
+    border:1px solid rgba(255,215,0,.25);
+    border-radius:28px;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.055),
+            rgba(0,0,0,.28)
+        );
+
+    box-shadow:
+        0 25px 90px rgba(0,0,0,.5),
+        inset 0 0 50px rgba(255,215,0,.025);
+}
+
+#geometryCanvas{
+    width:100%;
+    height:100%;
+
+    display:block;
+}
+
+/* =====================================================
+   ОТВЕТ
+===================================================== */
+
+.answer-box{
+    display:none;
+
+    width:100%;
+
+    margin-top:28px;
+    padding:21px 27px;
+
+    border:1px solid rgba(255,215,0,.38);
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,215,0,.10),
+            rgba(255,255,255,.025)
+        );
+
+    box-shadow:
+        0 0 55px rgba(255,215,0,.07);
+}
+
+.answer-title{
+    margin-bottom:9px;
+
+    color:var(--gold);
+
+    font-size:12px;
+    font-weight:900;
+
+    letter-spacing:.2em;
+}
+
+.answer-text{
+    font-size:clamp(18px,1.8vw,27px);
+    line-height:1.45;
+
+    font-weight:600;
+}
+
+/* =====================================================
+   КНОПКИ
+===================================================== */
+
+.controls{
+    min-height:125px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:20px 5vw 30px;
+}
+
+.main-btn{
+    border:0;
+    outline:0;
+
+    border-radius:16px;
+
+    font-family:inherit;
+
+    font-size:17px;
+    font-weight:900;
+
+    cursor:pointer;
+
+    transition:
+        transform .2s,
+        box-shadow .2s;
+}
+
+.main-btn:hover{
+    transform:translateY(-3px);
+}
+
+.main-btn:active{
+    transform:scale(.97);
+}
+
+.show-answer-btn{
+    min-width:310px;
+
+    padding:19px 35px;
+
+    color:#111;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff2a0,
+            #FFD700,
+            #d4a900
+        );
+
+    box-shadow:
+        0 12px 45px rgba(255,215,0,.17);
+}
+
+/* =====================================================
+   ✓ / −
+===================================================== */
+
+.rating-buttons{
+    display:none;
+    gap:30px;
+}
+
+.rating-btn{
+    width:150px;
+    height:110px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:25px;
+
+    font-size:55px;
+    font-weight:900;
+
+    cursor:pointer;
+
+    transition:
+        transform .2s,
+        box-shadow .2s;
+}
+
+.rating-btn:hover{
+    transform:translateY(-6px) scale(1.04);
+}
+
+.rating-btn:active{
+    transform:scale(.94);
+}
+
+.correct-btn{
+    border:2px solid var(--gold);
+
+    color:#111;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff5b5,
+            #FFD700,
+            #d7ad00
+        );
+
+    box-shadow:
+        0 15px 55px rgba(255,215,0,.2);
+}
+
+.wrong-btn{
+    border:2px solid #777;
+
+    color:#fff;
+
+    background:
+        linear-gradient(
+            145deg,
+            #292929,
+            #151515
+        );
+
+    box-shadow:
+        0 15px 45px rgba(0,0,0,.4);
+}
+
+/* =====================================================
+   SUNBURST ЭФФЕКТ ДЛЯ ТАБЛО
+===================================================== */
+
+.sunburst-background{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    overflow:hidden;
+    display:none;
+}
+
+.sunburst-disc{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    width:200vmax;
+    height:200vmax;
+    background:repeating-conic-gradient(
+        from 0deg,
+        rgba(255,215,0,0.15) 0deg 10deg,
+        rgba(255,215,0,0.05) 10deg 20deg,
+        transparent 20deg 30deg
+    );
+    animation:rotateSunburst 20s linear infinite;
+}
+
+@keyframes rotateSunburst{
+    from{
+        transform:translate(-50%, -50%) rotate(0deg);
+    }
+    to{
+        transform:translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* =====================================================
+   ТАБЛО
+===================================================== */
+
+#scoreScreen{
+    align-items:center;
+    justify-content:center;
+
+    padding:30px 30px 120px;
+    
+    position:relative;
+    z-index:2;
+}
+
+.score-title{
+    color:var(--muted);
+
+    font-size:13px;
+    font-weight:900;
+
+    letter-spacing:.25em;
+}
+
+.score-message{
+    margin-top:12px;
+    margin-bottom:35px;
+
+    color:var(--gold);
+
+    font-size:clamp(34px,4vw,58px);
+    font-weight:950;
+
+    text-shadow:
+        0 0 35px rgba(255,215,0,.35);
+
+    text-align:center;
+}
+
+.score-round{
+    margin-top:-18px;
+    margin-bottom:25px;
+
+    color:#ccc;
+
+    font-size:15px;
+    font-weight:700;
+
+    letter-spacing:.08em;
+}
+
+.score-board{
+    width:min(1100px,92vw);
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+
+    gap:28px;
+    
+    position:relative;
+    z-index:2;
+}
+
+.team-card{
+    position:relative;
+
+    min-height:290px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    overflow:hidden;
+
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:30px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.055),
+            rgba(255,255,255,.012)
+        );
+
+    box-shadow:
+        0 25px 80px rgba(0,0,0,.42);
+}
+
+.team-card.winner{
+    border-color:rgba(255,215,0,.85);
+
+    box-shadow:
+        0 0 75px rgba(255,215,0,.28),
+        inset 0 0 55px rgba(255,215,0,.08);
+}
+
+.team-card.winner::after{
+    content:"";
+
+    position:absolute;
+    inset:-50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,215,0,.3),
+            transparent 58%
+        );
+
+    animation:winnerPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes winnerPulse{
+    0%,100%{
+        opacity:.2;
+        transform:scale(.8);
+    }
+
+    50%{
+        opacity:.85;
+        transform:scale(1);
+    }
+}
+
+.team-name{
+    position:relative;
+    z-index:2;
+
+    color:var(--gold);
+
+    font-size:28px;
+    font-weight:950;
+}
+
+.team-score{
+    position:relative;
+    z-index:2;
+
+    margin-top:12px;
+
+    color:#fff;
+
+    font-size:clamp(80px,10vw,145px);
+    line-height:1;
+
+    font-weight:950;
+
+    font-variant-numeric:tabular-nums;
+}
+
+.round-gain{
+    position:absolute;
+    z-index:5;
+
+    color:var(--gold);
+
+    font-size:42px;
+    font-weight:950;
+
+    opacity:0;
+    pointer-events:none;
+
+    text-shadow:
+        0 0 30px rgba(255,215,0,.85);
+}
+
+/* =====================================================
+   ДАЛЬШЕ
+===================================================== */
+
+.next-btn{
+    position:absolute;
+    bottom:28px;
+
+    min-width:min(520px,80vw);
+
+    padding:20px 45px;
+
+    color:#111;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff2a0,
+            #FFD700,
+            #d3a800
+        );
+
+    font-size:20px;
+    letter-spacing:.1em;
+
+    box-shadow:
+        0 12px 55px rgba(255,215,0,.2);
+
+    opacity:0;
+    transform:translateY(30px);
+    
+    z-index:2;
+}
+
+/* =====================================================
+   ФИНАЛ
+===================================================== */
+
+#finishScreen{
+    display: flex;          /* Обязательно добавляем, чтобы выравнивание работало */
+    flex-direction: column; /* Элементы (кубок, текст) будут строиться друг под другом */
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    padding: 30px;
+    
+    /* ИСПРАВЛЕНИЕ: Фиксируем экран победы на месте поверх игры */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    
+    z-index: 10;            /* Поднимаем над игрой */
+}
+
+
+.trophy{
+    width:120px;
+    height:120px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:2px solid var(--gold);
+    border-radius:35px;
+
+    color:var(--gold);
+
+    font-size:50px;
+    font-weight:900;
+
+    box-shadow:
+        0 0 55px rgba(255,215,0,.2),
+        inset 0 0 35px rgba(255,215,0,.06);
+
+    position:relative;
+    z-index:3;
+}
+
+.trophy img{
+    width:80%;
+    height:80%;
+    object-fit:contain;
+    display:block;
+}
+
+.final-winner{
+    margin-top:20px;
+
+    color:#fff;
+
+    font-size:clamp(28px,4vw,48px);
+    font-weight:950;
+
+    text-shadow:
+        0 0 25px rgba(255,215,0,.45);
+    
+    position:relative;
+    z-index:3;
+}
+
+.final-subtitle{
+    margin-top:15px;
+
+    color:#ddd;
+
+    font-size:23px;
+    
+    position:relative;
+    z-index:3;
+}
+
+/* =====================================================
+   БОЛЬШОЕ ЛОГО НА ФИНАЛЕ
+===================================================== */
+
+.final-logo{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    width:600px;
+    height:600px;
+    z-index:1;
+    pointer-events:none;
+    opacity:0.3;
+}
+
+.final-logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+/* =====================================================
+   ОБЛАКА НА ФИНАЛЕ
+===================================================== */
+
+.clouds-wrapper{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    overflow:hidden;
+}
+
+.cloud{
+    position:absolute;
+    background:rgba(255,255,255,0.1);
+    border-radius:50%;
+    filter:blur(20px);
+    animation:floatCloud 8s ease-in-out infinite;
+}
+
+.cloud:nth-child(1){
+    width:300px;
+    height:150px;
+    top:10%;
+    left:10%;
+    animation-delay:0s;
+}
+
+.cloud:nth-child(2){
+    width:400px;
+    height:200px;
+    top:20%;
+    right:15%;
+    animation-delay:2s;
+}
+
+.cloud:nth-child(3){
+    width:350px;
+    height:175px;
+    bottom:15%;
+    left:20%;
+    animation-delay:4s;
+}
+
+.cloud:nth-child(4){
+    width:250px;
+    height:125px;
+    bottom:25%;
+    right:10%;
+    animation-delay:6s;
+}
+
+@keyframes floatCloud{
+    0%,100%{
+        transform:translateY(0) scale(1);
+        opacity:0.1;
+    }
+    50%{
+        transform:translateY(-20px) scale(1.05);
+        opacity:0.2;
+    }
+}
+
+.final-scores{
+    display:flex;
+    gap:80px;
+
+    margin-top:35px;
+    
+    position:relative;
+    z-index:3;
+}
+
+.final-team{
+    font-size:25px;
+    font-weight:800;
+}
+
+.final-number{
+    display:block;
+
+    margin-top:7px;
+
+    color:var(--gold);
+
+    font-size:52px;
+}
+
+.restart-btn{
+    margin-top:38px;
+
+    padding:18px 42px;
+
+    color:#111;
+
+    background:var(--gold);
+}
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+.fullscreen-btn{
+    position:fixed;
+    z-index:100;
+
+    top:20px;
+    right:25px;
+
+    width:43px;
+    height:43px;
+
+    border:1px solid var(--border);
+    border-radius:12px;
+
+    color:var(--gold);
+
+    background:rgba(0,0,0,.3);
+
+    cursor:pointer;
+
+    font-size:18px;
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+
+/* =====================================================
+   ЖИВОЕ ТАБЛО ВО ВРЕМЯ ИГРЫ
+===================================================== */
+
+.live-score-panel{
+    position:fixed;
+    z-index:30;
+    top:102px;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(720px,88vw);
+    min-height:92px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:28px;
+    padding:22px 42px 18px;
+    border:1px solid rgba(255,215,0,.48);
+    border-radius:24px;
+    background:rgba(7,7,7,.70);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    box-shadow:
+        0 18px 70px rgba(0,0,0,.45),
+        0 0 45px rgba(255,215,0,.10),
+        inset 0 0 35px rgba(255,215,0,.035);
+}
+
+.live-score-close{
+    position:absolute;
+    top:-14px;
+    left:50%;
+    transform:translateX(-50%);
+    width:28px;
+    height:28px;
+    border:1px solid rgba(255,215,0,.65);
+    border-radius:50%;
+    color:var(--gold);
+    background:rgba(8,8,8,.94);
+    font-size:18px;
+    font-weight:900;
+    line-height:25px;
+    cursor:pointer;
+    box-shadow:0 0 18px rgba(255,215,0,.16);
+}
+
+.live-team{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    min-width:0;
+    color:#aaa;
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:.10em;
+    transition:.25s ease;
+}
+
+.live-team-score{
+    color:#fff;
+    font-size:38px;
+    line-height:1;
+    font-weight:950;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 0 18px rgba(255,255,255,.08);
+    transition:.25s ease;
+}
+
+.live-team.active{
+    color:var(--gold);
+}
+
+.live-team.active .live-team-score{
+    color:var(--gold);
+    text-shadow:
+        0 0 10px rgba(255,215,0,.65),
+        0 0 28px rgba(255,215,0,.38),
+        0 0 48px rgba(255,215,0,.18);
+}
+
+.live-turn-badge{
+    flex:0 0 auto;
+    padding:9px 16px;
+    border:1px solid rgba(255,215,0,.65);
+    border-radius:999px;
+    color:var(--gold);
+    background:rgba(255,215,0,.07);
+    font-size:12px;
+    font-weight:950;
+    letter-spacing:.08em;
+    white-space:nowrap;
+    box-shadow:0 0 22px rgba(255,215,0,.10);
+}
+
+.live-score-reopen{
+    position:fixed;
+    z-index:29;
+    top:102px;
+    left:50%;
+    transform:translateX(-50%);
+    display:none;
+    padding:8px 16px;
+    border:1px solid rgba(255,215,0,.55);
+    border-radius:999px;
+    color:var(--gold);
+    background:rgba(7,7,7,.82);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    font-size:12px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+@media(max-width:850px){
+    .live-score-panel{
+        top:87px;
+        width:min(94vw,560px);
+        gap:10px;
+        padding:18px 18px 14px;
+        min-height:78px;
+    }
+
+    .live-team{
+        gap:7px;
+        font-size:10px;
+        letter-spacing:.06em;
+    }
+
+    .live-team-score{
+        font-size:28px;
+    }
+
+    .live-turn-badge{
+        padding:7px 9px;
+        font-size:9px;
+    }
+
+    .live-score-reopen{
+        top:86px;
+    }
+}
+
+@media(max-width:850px){
+
+    body{
+        overflow:auto;
+    }
+
+    .start-buttons{
+        flex-direction:column;
+        width:min(400px,90vw);
+    }
+
+    .team-start{
+        width:100%;
+    }
+
+    .header{
+        height:75px;
+        min-height:75px;
+        padding:0 18px;
+    }
+
+    .logo-name{
+        font-size:16px;
+    }
+
+    .logo-icon{
+        width:37px;
+        height:37px;
+    }
+
+    .progress{
+        font-size:12px;
+    }
+
+    .active-team{
+        top:88px;
+    }
+
+    .question-area{
+        padding:75px 20px 10px;
+    }
+
+    .question-content{
+        flex-direction:column;
+        gap:25px;
+    }
+
+    .question-column{
+        width:100%;
+    }
+
+    .question-text{
+        font-size:28px;
+    }
+
+    .geometry-column{
+        width:100%;
+    }
+
+    .geometry-box{
+        width:min(700px,94vw);
+        aspect-ratio:1.55;
+    }
+
+    .answer-box{
+        padding:17px 20px;
+    }
+
+    .rating-buttons{
+        gap:15px;
+    }
+
+    .rating-btn{
+        width:120px;
+        height:90px;
+        font-size:45px;
+    }
+
+    .score-board{
+        grid-template-columns:1fr;
+    }
+
+    .team-card{
+        min-height:190px;
+    }
+
+    .team-score{
+        font-size:80px;
+    }
+
+    #scoreScreen{
+        overflow-y:auto;
+    }
+
+    .final-scores{
+        flex-direction:column;
+        gap:20px;
+    }
+
+    .fullscreen-btn{
+        display:none;
+    }
+}
+
+@media(max-height:700px) and (min-width:851px){
+
+    .question-area{
+        padding-top:20px;
+    }
+
+    .question-text{
+        font-size:clamp(25px,3vw,45px);
+    }
+
+    .geometry-box{
+        max-height:48vh;
+    }
+
+    .controls{
+        min-height:100px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     CANVAS ФОНА
+===================================================== -->
+
+<canvas id="particlesCanvas"></canvas>
+
+<div class="background-overlay"></div>
+
+<!-- ЦЕНТРАЛЬНОЕ ЛОГО ВО ВРЕМЯ ИГРЫ -->
+<div class="center-logo" id="centerLogo">
+    <img src="лого.png" alt="Логотип">
+</div>
+
+
+<!-- =====================================================
+     START
+===================================================== -->
+
+<section class="screen active" id="startScreen">
+
+    <div class="start-logo">
+        <img src="лого.png" alt="Алтадж">
+    </div>
+
+    <h1 class="start-title">
+        Школа «Корона»<br>
+        Последний звонок
+    </h1>
+
+    <p class="start-question">
+        Кто начинает викторину?
+    </p>
+
+    <div class="start-buttons">
+
+        <button
+            class="team-start"
+            id="girlsStart"
+        >
+            ДЕВОЧКИ
+        </button>
+
+        <button
+            class="team-start"
+            id="boysStart"
+        >
+            МАЛЬЧИКИ
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     QUESTION
+===================================================== -->
+
+<section class="screen" id="questionScreen">
+
+    <header class="header">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                <img src="лого.png" alt="Алтадж">
+            </div>
+
+            <div class="logo-name">
+                Корона
+            </div>
+
+        </div>
+
+        <div class="progress">
+            ВОПРОС
+            <span id="currentQuestionNumber">1</span>
+            ИЗ 15
+        </div>
+
+    </header>
+
+    <!-- ЖИВОЕ ТАБЛО СЧЁТА -->
+    <div class="live-score-panel" id="liveScorePanel">
+
+        <button
+            class="live-score-close"
+            id="liveScoreClose"
+            type="button"
+            aria-label="Скрыть табло"
+        >×</button>
+
+        <div class="live-team" id="liveGirlsTeam">
+            <span>ДЕВОЧКИ</span>
+            <strong class="live-team-score" id="liveGirlsScore">0</strong>
+        </div>
+
+        <div class="live-turn-badge" id="liveTurnBadge">ХОД: ДЕВОЧКИ</div>
+
+        <div class="live-team" id="liveBoysTeam">
+            <strong class="live-team-score" id="liveBoysScore">0</strong>
+            <span>МАЛЬЧИКИ</span>
+        </div>
+
+    </div>
+
+    <button
+        class="live-score-reopen"
+        id="liveScoreReopen"
+        type="button"
+    >СЧЁТ</button>
+
+
+    <div
+        class="active-team"
+        id="activeTeam"
+    >
+        ХОД: ДЕВОЧКИ
+    </div>
+
+
+    <main class="question-area">
+
+        <div class="question-content">
+
+            <div class="question-column">
+
+                <div class="question-label">
+                    ВОПРОС
+                </div>
+
+                <div
+                    class="step-label"
+                    id="stepLabel"
+                >
+                    ЭТАП 1 ИЗ 5
+                </div>
+
+                <h1
+                    class="question-text"
+                    id="questionText"
+                ></h1>
+
+
+                <div
+                    class="answer-box"
+                    id="answerBox"
+                >
+
+                    <div class="answer-title">
+                        ПРАВИЛЬНЫЙ ОТВЕТ
+                    </div>
+
+                    <div
+                        class="answer-text"
+                        id="answerText"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="geometry-column"
+                id="geometryColumn"
+                style="display:none;"
+            >
+
+                <div class="geometry-box">
+
+                    <canvas
+                        id="geometryCanvas"
+                    ></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <footer class="controls">
+
+        <!-- ДО ОТВЕТА ТОЛЬКО ЭТА КНОПКА -->
+
+        <button
+            class="main-btn show-answer-btn"
+            id="showAnswerBtn"
+        >
+            ПОКАЗАТЬ ОТВЕТ
+        </button>
+
+
+        <!-- ПОСЛЕ ОТВЕТА ТОЛЬКО ✓ И − -->
+
+        <div
+            class="rating-buttons"
+            id="ratingButtons"
+        >
+
+            <button
+                class="rating-btn correct-btn"
+                id="correctBtn"
+                title="Ответ верный"
+            >
+                ✓
+            </button>
+
+            <button
+                class="rating-btn wrong-btn"
+                id="wrongBtn"
+                title="Ответ неверный"
+            >
+                −
+            </button>
+
+        </div>
+
+    </footer>
+
+</section>
+
+
+<!-- =====================================================
+     SUNBURST ФОН ДЛЯ ТАБЛО
+===================================================== -->
+
+<div class="sunburst-background" id="sunburstBackground">
+    <div class="sunburst-disc"></div>
+</div>
+
+
+<!-- =====================================================
+     SCORE
+===================================================== -->
+
+<section
+    class="screen"
+    id="scoreScreen"
+>
+
+    <div class="score-title">
+        ТАБЛО СЧЁТА
+    </div>
+
+    <div
+        class="score-message"
+        id="scoreMessage"
+    >
+        РАУНД ЗАВЕРШЁН
+    </div>
+
+    <div
+        class="score-round"
+        id="scoreRound"
+    >
+        РЕЗУЛЬТАТ ВОПРОСА
+    </div>
+
+
+    <div class="score-board">
+
+        <div
+            class="team-card"
+            id="girlsCard"
+        >
+
+            <div class="team-name">
+                ДЕВОЧКИ
+            </div>
+
+            <div
+                class="team-score"
+                id="girlsScore"
+            >
+                0
+            </div>
+
+            <div
+                class="round-gain"
+                id="girlsGain"
+            >
+                +0
+            </div>
+
+        </div>
+
+
+        <div
+            class="team-card"
+            id="boysCard"
+        >
+
+            <div class="team-name">
+                МАЛЬЧИКИ
+            </div>
+
+            <div
+                class="team-score"
+                id="boysScore"
+            >
+                0
+            </div>
+
+            <div
+                class="round-gain"
+                id="boysGain"
+            >
+                +0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ТОЛЬКО РУЧНОЙ ПЕРЕХОД -->
+
+    <button
+        class="main-btn next-btn"
+        id="nextBtn"
+    >
+        ДАЛЬШЕ
+    </button>
+
+</section>
+
+
+<!-- =====================================================
+     FINAL
+===================================================== -->
+
+<section
+    class="screen"
+    id="finishScreen"
+>
+
+    <!-- ОБЛАКА НА ФИНАЛЕ -->
+    <div class="clouds-wrapper">
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+    </div>
+
+    <!-- БОЛЬШОЕ ЛОГО НА ФИНАЛЕ -->
+    <div class="final-logo">
+        <img src="лого.png" alt="Логотип">
+    </div>
+
+    <div class="trophy">
+    <img src="лого.png" alt="Логотип">
+</div>
+
+    <h1 class="final-title">
+        ВИКТОРИНА ЗАВЕРШЕНА
+    </h1>
+
+    <h2 class="final-winner" id="finalWinner">
+        Команда ДЕВОЧКИ победила!
+    </h2>
+
+    <p class="final-subtitle">
+        Поздравляем выпускников школы «Корона»!
+    </p>
+
+
+    <div class="final-scores">
+
+        <div class="final-team">
+            ДЕВОЧКИ
+
+            <span
+                class="final-number"
+                id="finalGirls"
+            >
+                0
+            </span>
+        </div>
+
+
+        <div class="final-team">
+            МАЛЬЧИКИ
+
+            <span
+                class="final-number"
+                id="finalBoys"
+            >
+                0
+            </span>
+        </div>
+
+    </div>
+
+
+    <button
+        class="main-btn restart-btn"
+        id="restartBtn"
+    >
+        НАЧАТЬ ЗАНОВО
+    </button>
+
+</section>
+
+
+<script>
+
+/* =====================================================
+   БАЗА 15 БОЛЬШИХ ВОПРОСОВ
+   КАЖДЫЙ = 5 ЭТАПОВ
+===================================================== */
+
+const questions = [
+  {
+    "id": 1,
+    "steps": [
+      {"question": "Сколько букв в русском алфавите?", "answer": "33 буквы"},
+      {"question": "Сколько звуков в русском алфавите?", "answer": "42 звука"},
+      {"question": "Какие буквы не обозначают звука?", "answer": "Ъ и Ь"},
+      {"question": "У каких букв может быть 2 звука и почему?", "answer": "Е, Ё, Ю, Я (в начале слова, после гласных и Ъ/Ь)"}
+    ]
+  },
+  {
+    "id": 2,
+    "steps": [
+      {"question": "Что вы знаете про буквы «Ч» и «Щ»?", "answer": "Они шипящие и  они всегда мягкие [ч'] и [щ']"},
+      {"question": "Расскажите все пройденные правила на Ч и Щ.", "answer": "ЧА-ЩА пиши с А; ЧУ-ЩУ пиши с У; ЧК, ЧН, ЧТ, ЩН без Ь"}
+    ]
+  },
+  {
+    "id": 3,
+    "steps": [
+      {"question": "Что вы знаете про буквы «Ж» и «Ш»?", "answer": "Они шипящие и они всегда твёрдые [ж] и [ш]"},
+      {"question": "Расскажите все пройденные правила на Ж и Ш.", "answer": "ЖИ-ШИ пиши с буквой И"}
+    ]
+  },
+  {
+    id:4,
+        title:"Вопрос 4 из 15",
+        geometry:"angles",
+        steps: [
+      {"question": "Назови угол №1", "answer": "Прямой угол", "type": "angles"},
+      {"question": "Назови угол №2", "answer": "Тупой угол", "type": "angles"},
+      {"question": "Назови угол №3", "answer": "Острый угол", "type": "angles"}
+    ]
+  },
+  {
+     id:5,
+        title:"Вопрос 5 из 15",
+        geometry:"lines",
+        steps: [
+      {"question": "назови фигуру №1", "answer": "Отрезок", "type": "lines"},
+      {"question": "назови фигуру №2", "answer": "Луч", "type": "lines"},
+      {"question": "назови фигуру №3", "answer": "Прямая", "type": "lines"},
+      {"question": "назови фигуру №4", "answer": "Ломаная", "type": "lines"}
+    ]
+  },
+  {
+    "id": 6,
+    "steps": [
+      {"question": " Назовите все пройденные виды литературного жанра", "answer": "Сказка (народная и авторская), Рассказ, Загадка,  считалка, небылица  "},
+
+     
+	] 
+  },
+  {
+    "id": 7,
+    "steps": [
+      {"question": "Что есть у стихотворения, чего нет у прозы?", "answer": "Рифма, ритм, строфа"}
+    ]
+  },
+  {
+    "id": 8,
+    "steps": [
+      {"question": "Почему только Россия называется Федерацией?", "answer": ". Федерация — это союз, объединение отдельных территорий (республик, краев, областей) в одно общее государство"}
+      ]
+  },
+  {
+    "id": 9,
+    "steps": [
+      {"question": "Откуда берётся свет в нашем доме?", "answer": "Электрический свет появляется от электронов, который вырабатывается на электростанциях "}
+    ]
+  },
+  {
+    "id": 10,
+    "steps": [
+      {"question": "Сколько видов транспорта мы прошли? Приведите примеры каждого.", "answer": "Наземный, подземный, водный, воздушный."}
+    ]
+  },
+  {
+    "id": 11,
+    "steps": [
+      {"question": "Что такое радуга и почему мы её видим?", "answer": "Радуга — это красивое природное явление, возникающее, когда солнечные лучи проходят сквозь капли дождя в воздухе и распадаются на 7 цветов. Мы видим ее, когда одновременно идет дождь и светит солнце."}
+    ]
+  },
+  {
+    "id": 12,
+    "steps": [
+      {"question": "Какие виды природы мы прошли и чем они отличаются", "answer": "Живая природа и не живая природа , Живая природа - рождается, дышит, растёт, питается и размножается , а неживая нет"}
+    ]
+  },
+  {
+    "id": 13,
+    "steps": [
+      {"question": "Какие виды растений вы знаете, и чем они от друг-друга отличаются", "answer": "Деревья (лиственные/хвойные), кустарники, травы. "},
+	  {"question": "На какие виды делится деревья ?", "answer": "на лиственные и хвойные "},
+	  {"question": "что общего у всех растений ?", "answer": " Лист,стебель,корень,семена  "}
+    
+    
+    ]
+  },
+  {
+    "id": 14,
+    "steps": [
+      {"question": "Что такое звук и как он появляется?", "answer": "Звук — это невидимые колебания (вибрации) воздуха"}
+    ]
+  },
+  {
+    "id": 15,
+    "steps": [
+      {"question": "Что такое ветер?", "answer": "Ветер — это движение горячего и холодного воздуха"},
+      {"question": "Что такое дождь и снег?", "answer": "Дождь — капли воды. Снег — замерзшие кристаллы воды (снежинки)"}
+    ]
+  },
+{
+    "id": 16,
+    "steps": [
+      {"question": "Сколько месяцев в году?", "answer": "12"},
+      {"question": "дней в месяце?", "answer": "30"},
+	  {"question": "Сколько дней в недели", "answer": "12"},
+	  {"question": "Перечисли дни недели.", "answer": "Понедельник , Вторник , среда , Четверг , Пятница , Суббота, Воскресенье"},
+	  {"question": "Перечисли последовательность времен года", "answer": "Зима , Весна , Лето ,Осень"}
+	  
+    ]
+  }
+]
+
+
+/* =====================================================
+   СОСТОЯНИЕ ИГРЫ
+===================================================== */
+
+let currentQuestion = 0;
+
+/*
+    Текущий этап внутри большого вопроса.
+    0 = первый этап
+    1 = второй
+    ...
+    4 = пятый
+*/
+let currentStep = 0;
+
+/*
+    Текущая команда.
+    "girls" или "boys"
+*/
+let activeTeam = null;
+
+
+/*
+    ОБЩИЙ СЧЁТ за все 15 вопросов
+*/
+let girlsScore = 0;
+let boysScore = 0;
+
+
+/*
+    КОРЗИНА ТЕКУЩЕГО БОЛЬШОГО ВОПРОСА
+
+    За каждый правильный этап +100.
+
+    Эти очки НЕ добавляются в общий счёт
+    до завершения всех 5 этапов.
+*/
+let girlsRoundScore = 0;
+let boysRoundScore = 0;
+
+
+/*
+    Защита от двойного нажатия.
+*/
+let answerShown = false;
+let processingAnswer = false;
+
+
+/* =====================================================
+   DOM
+===================================================== */
+
+const startScreen =
+    document.getElementById("startScreen");
+
+const questionScreen =
+    document.getElementById("questionScreen");
+
+const scoreScreen =
+    document.getElementById("scoreScreen");
+
+const finishScreen =
+    document.getElementById("finishScreen");
+
+const questionText =
+    document.getElementById("questionText");
+
+const questionNumber =
+    document.getElementById("currentQuestionNumber");
+
+const stepLabel =
+    document.getElementById("stepLabel");
+
+const activeTeamElement =
+    document.getElementById("activeTeam");
+
+const answerBox =
+    document.getElementById("answerBox");
+
+const answerText =
+    document.getElementById("answerText");
+
+const showAnswerBtn =
+    document.getElementById("showAnswerBtn");
+
+const ratingButtons =
+    document.getElementById("ratingButtons");
+
+const correctBtn =
+    document.getElementById("correctBtn");
+
+const wrongBtn =
+    document.getElementById("wrongBtn");
+
+const geometryColumn =
+    document.getElementById("geometryColumn");
+
+const geometryCanvas =
+    document.getElementById("geometryCanvas");
+
+const girlsCard =
+    document.getElementById("girlsCard");
+
+const boysCard =
+    document.getElementById("boysCard");
+
+const girlsScoreElement =
+    document.getElementById("girlsScore");
+
+const boysScoreElement =
+    document.getElementById("boysScore");
+
+const girlsGain =
+    document.getElementById("girlsGain");
+
+const boysGain =
+    document.getElementById("boysGain");
+
+const scoreMessage =
+    document.getElementById("scoreMessage");
+
+const scoreRound =
+    document.getElementById("scoreRound");
+
+const nextBtn =
+    document.getElementById("nextBtn");
+
+const liveScorePanel =
+    document.getElementById("liveScorePanel");
+
+const liveScoreClose =
+    document.getElementById("liveScoreClose");
+
+const liveScoreReopen =
+    document.getElementById("liveScoreReopen");
+
+const liveGirlsTeam =
+    document.getElementById("liveGirlsTeam");
+
+const liveBoysTeam =
+    document.getElementById("liveBoysTeam");
+
+const liveGirlsScore =
+    document.getElementById("liveGirlsScore");
+
+const liveBoysScore =
+    document.getElementById("liveBoysScore");
+
+const liveTurnBadge =
+    document.getElementById("liveTurnBadge");
+
+
+/* =====================================================
+   ЭКРАНЫ
+===================================================== */
+
+function showScreen(screen){
+
+    document
+        .querySelectorAll(".screen")
+        .forEach(item=>{
+            item.classList.remove("active");
+        });
+
+    screen.classList.add("active");
+}
+
+
+/* =====================================================
+   ЗВУК
+===================================================== */
+
+function startSound(){
+
+    try{
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if(!AudioContext){
+            return;
+        }
+
+        const context =
+            new AudioContext();
+
+        const notes=[
+            392,
+            523.25,
+            659.25,
+            783.99
+        ];
+
+        notes.forEach(
+            (frequency,index)=>{
+
+                const oscillator =
+                    context.createOscillator();
+
+                const gain =
+                    context.createGain();
+
+                oscillator.type="triangle";
+
+                oscillator.frequency.value =
+                    frequency;
+
+                oscillator.connect(gain);
+                gain.connect(context.destination);
+
+                const startTime =
+                    context.currentTime +
+                    index*.12;
+
+                gain.gain.setValueAtTime(
+                    0,
+                    startTime
+                );
+
+                gain.gain.linearRampToValueAtTime(
+                    .12,
+                    startTime+.03
+                );
+
+                gain.gain.exponentialRampToValueAtTime(
+                    .001,
+                    startTime+.5
+                );
+
+                oscillator.start(startTime);
+
+                oscillator.stop(
+                    startTime+.55
+                );
+            }
+        );
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+}
+
+
+/* =====================================================
+   ФОНЫ РАУНДОВ
+===================================================== */
+
+const roundBackgrounds = [
+    "фон.png",
+    "фон2.png",
+    "фон3.png"
+];
+
+function updateRoundBackground(questionIndex){
+
+    const bgImage =
+        roundBackgrounds[
+            questionIndex % roundBackgrounds.length
+        ];
+
+    document.body.style.backgroundImage =
+        `url("${bgImage}")`;
+
+    document.body.style.backgroundSize =
+        "cover";
+
+    document.body.style.backgroundPosition =
+        "center";
+
+    document.body.style.backgroundRepeat =
+        "no-repeat";
+
+    document.body.style.backgroundAttachment =
+        "fixed";
+}
+
+
+/* =====================================================
+   ЖИВОЕ ТАБЛО СЧЁТА
+===================================================== */
+
+function updateLiveScoreboard(){
+
+    liveGirlsScore.textContent =
+        girlsScore;
+
+    liveBoysScore.textContent =
+        boysScore;
+
+    liveTurnBadge.textContent =
+        activeTeam === "girls"
+            ? "ХОД: ДЕВОЧКИ"
+            : "ХОД: МАЛЬЧИКИ";
+
+    liveGirlsTeam.classList.toggle(
+        "active",
+        activeTeam === "girls"
+    );
+
+    liveBoysTeam.classList.toggle(
+        "active",
+        activeTeam === "boys"
+    );
+}
+
+
+liveScoreClose.addEventListener(
+    "click",
+    ()=>{
+        liveScorePanel.style.display =
+            "none";
+
+        liveScoreReopen.style.display =
+            "block";
+    }
+);
+
+
+liveScoreReopen.addEventListener(
+    "click",
+    ()=>{
+        liveScorePanel.style.display =
+            "flex";
+
+        liveScoreReopen.style.display =
+            "none";
+    }
+);
+
+
+/* =====================================================
+   СТАРТ ИГРЫ
+===================================================== */
+
+document
+    .getElementById("girlsStart")
+    .addEventListener(
+        "click",
+        ()=>{
+            startGame("girls");
+        }
+    );
+
+
+document
+    .getElementById("boysStart")
+    .addEventListener(
+        "click",
+        ()=>{
+            startGame("boys");
+        }
+    );
+
+
+function startGame(team){
+
+    activeTeam=team;
+
+    currentQuestion=0;
+    currentStep=0;
+
+    girlsScore=0;
+    boysScore=0;
+
+    girlsRoundScore=0;
+    boysRoundScore=0;
+
+    girlsScoreElement.textContent="0";
+    boysScoreElement.textContent="0";
+
+    /* Первый большой вопрос = фон.png */
+    updateRoundBackground(currentQuestion);
+
+    /* Табло всегда начинается открытым */
+    liveScorePanel.style.display="flex";
+    liveScoreReopen.style.display="none";
+    updateLiveScoreboard();
+
+    /* Показываем центральное логотип во время игры */
+    document.getElementById("centerLogo").style.display="block";
+
+    startSound();
+
+    gsap.to(
+        startScreen,
+        {
+            opacity:0,
+            scale:1.04,
+            duration:.45,
+
+            onComplete:()=>{
+
+                showScreen(questionScreen);
+
+                gsap.fromTo(
+                    questionScreen,
+                    {
+                        opacity:0,
+                        scale:.97
+                    },
+                    {
+                        opacity:1,
+                        scale:1,
+                        duration:.55,
+                        ease:"power3.out"
+                    }
+                );
+
+                loadQuestion();
+            }
+        }
+    );
+}
+
+
+/* =====================================================
+   ЗАГРУЗКА ТЕКУЩЕГО ЭТАПА
+===================================================== */
+
+function loadQuestion(){
+
+    const bigQuestion =
+        questions[currentQuestion];
+
+    const step =
+        bigQuestion.steps[currentStep];
+
+
+    answerShown=false;
+    processingAnswer=false;
+
+
+    /*
+        Номер большого вопроса
+    */
+
+    questionNumber.textContent =
+        bigQuestion.id;
+
+
+    /*
+        Номер этапа
+    */
+
+    stepLabel.textContent =
+        `ЭТАП ${currentStep+1} ИЗ ${bigQuestion.steps.length}`;
+
+
+    /*
+        ТЕКУЩИЙ ПОДВОПРОС
+    */
+
+    questionText.textContent =
+        step.question;
+
+
+    /*
+        ОТВЕТ
+    */
+
+    answerText.textContent =
+        step.answer;
+
+
+    /*
+        В НАЧАЛЕ:
+        ответ скрыт
+    */
+
+    answerBox.style.display="none";
+    answerBox.style.opacity="0";
+
+
+    /*
+        В НАЧАЛЕ:
+        только ПОКАЗАТЬ ОТВЕТ
+    */
+
+    showAnswerBtn.style.display="block";
+    showAnswerBtn.style.opacity="1";
+    showAnswerBtn.style.transform="translateY(0)";
+
+
+    /*
+        ✓ и − скрыты
+    */
+
+    ratingButtons.style.display="none";
+
+
+    /*
+        ХОД
+    */
+
+    activeTeamElement.textContent =
+        activeTeam==="girls"
+            ? "ХОД: ДЕВОЧКИ"
+            : "ХОД: МАЛЬЧИКИ";
+
+    /* Сразу обновляем живое табло и подсветку очереди */
+    updateLiveScoreboard();
+
+
+    /*
+        ГЕОМЕТРИЯ
+
+        Очень важно:
+        каждый новый этап начинает
+        Canvas БЕЗ ПОДПИСЕЙ.
+    */
+
+    if(bigQuestion.geometry){
+
+        geometryColumn.style.display="flex";
+
+        resizeGeometryCanvas();
+
+        drawGeometry(
+            bigQuestion.geometry,
+            false
+        );
+
+        gsap.fromTo(
+            geometryColumn,
+            {
+                opacity:0,
+                x:60,
+                scale:.94
+            },
+            {
+                opacity:1,
+                x:0,
+                scale:1,
+                duration:.55,
+                ease:"back.out(1.4)"
+            }
+        );
+
+    }else{
+
+        geometryColumn.style.display="none";
+    }
+
+
+    /*
+        Анимация текста
+    */
+
+    gsap.fromTo(
+        ".question-label",
+        {
+            opacity:0,
+            y:-15
+        },
+        {
+            opacity:1,
+            y:0,
+            duration:.3
+        }
+    );
+
+
+    gsap.fromTo(
+        ".step-label",
+        {
+            opacity:0,
+            y:-10
+        },
+        {
+            opacity:1,
+            y:0,
+            duration:.3
+        }
+    );
+
+
+    gsap.fromTo(
+        ".question-text",
+        {
+            opacity:0,
+            y:25
+        },
+        {
+            opacity:1,
+            y:0,
+            duration:.45,
+            ease:"power3.out"
+        }
+    );
+
+
+    gsap.fromTo(
+        ".active-team",
+        {
+            opacity:0,
+            y:-10
+        },
+        {
+            opacity:1,
+            y:0,
+            duration:.3
+        }
+    );
+}
+
+
+/* =====================================================
+   ПОКАЗАТЬ ОТВЕТ
+===================================================== */
+
+showAnswerBtn.addEventListener(
+    "click",
+    ()=>{
+
+        if(answerShown){
+            return;
+        }
+
+        answerShown=true;
+
+
+        /*
+            Ответ появляется.
+        */
+
+        answerBox.style.display="block";
+
+        gsap.fromTo(
+            answerBox,
+            {
+                opacity:0,
+                y:25,
+                scale:.97
+            },
+            {
+                opacity:1,
+                y:0,
+                scale:1,
+                duration:.45,
+                ease:"power3.out"
+            }
+        );
+
+
+        /*
+            Кнопка ПОКАЗАТЬ ОТВЕТ исчезает.
+        */
+
+        gsap.to(
+            showAnswerBtn,
+            {
+                opacity:0,
+                y:15,
+                duration:.22,
+
+                onComplete:()=>{
+
+                    showAnswerBtn.style.display="none";
+
+
+                    /*
+                        Теперь появляются
+                        ТОЛЬКО ✓ и −.
+                    */
+
+                    ratingButtons.style.display="flex";
+
+                    gsap.fromTo(
+                        ratingButtons,
+                        {
+                            opacity:0,
+                            y:20,
+                            scale:.9
+                        },
+                        {
+                            opacity:1,
+                            y:0,
+                            scale:1,
+                            duration:.4,
+                            ease:"back.out(1.5)"
+                        }
+                    );
+
+
+                    /*
+                        И ТОЛЬКО ПОСЛЕ
+                        ПОКАЗА ОТВЕТА
+                        Canvas получает подписи.
+                    */
+
+                    const bigQuestion =
+                        questions[currentQuestion];
+
+                    if(bigQuestion.geometry){
+
+                        drawGeometry(
+                            bigQuestion.geometry,
+                            true
+                        );
+
+                    }
+
+                }
+            }
+        );
+    }
+);
+
+
+/* =====================================================
+   ✓ ПРАВИЛЬНО
+===================================================== */
+
+correctBtn.addEventListener(
+    "click",
+    ()=>{
+
+        if(!answerShown){
+            return;
+        }
+
+        if(processingAnswer){
+            return;
+        }
+
+        processingAnswer=true;
+
+
+        /*
+            +100 В КОРЗИНУ РАУНДА
+        */
+
+        if(activeTeam==="girls"){
+
+            girlsRoundScore+=100;
+            girlsScore+=100;
+
+        }else{
+
+            boysRoundScore+=100;
+            boysScore+=100;
+
+        }
+
+        /* Постоянное табло обновляется сразу после ✓. */
+        updateLiveScoreboard();
+
+
+        const bigQuestion =
+            questions[currentQuestion];
+
+
+        /*
+            ЕСЛИ ЭТО НЕ ПОСЛЕДНИЙ ЭТАП:
+
+            НЕ ОТКРЫВАЕМ ТАБЛО.
+            НЕ ПЕРЕКЛЮЧАЕМ КОМАНДУ.
+            СРАЗУ СЛЕДУЮЩИЙ ЭТАП
+            ДЛЯ ТОЙ ЖЕ КОМАНДЫ.
+        */
+
+        if(
+            currentStep <
+            bigQuestion.steps.length-1
+        ){
+
+            currentStep++;
+
+            loadQuestion();
+
+            processingAnswer=false;
+
+            return;
+        }
+
+
+        /*
+            ЕСЛИ ЭТО БЫЛ 5-Й ЭТАП:
+
+            Раунд завершён.
+            Только сейчас открываем табло.
+        */
+
+        openScoreScreen();
+
+    }
+);
+
+
+/* =====================================================
+   − ОШИБКА
+===================================================== */
+
+wrongBtn.addEventListener(
+    "click",
+    ()=>{
+
+        if(!answerShown){
+            return;
+        }
+
+        if(processingAnswer){
+            return;
+        }
+
+        processingAnswer=true;
+
+
+        /*
+            Баллы НЕ начисляются.
+        */
+
+
+        /*
+            ЭТАП НЕ МЕНЯЕТСЯ.
+
+            Меняется только команда.
+        */
+
+        activeTeam =
+            activeTeam==="girls"
+                ? "boys"
+                : "girls";
+
+
+        /*
+            МГНОВЕННО загружаем
+            ТОТ ЖЕ САМЫЙ этап
+            для другой команды.
+        */
+
+        loadQuestion();
+
+        processingAnswer=false;
+
+    }
+);
+
+
+/* =====================================================
+   ТАБЛО ПОСЛЕ ЗАВЕРШЕНИЯ 5 ЭТАПОВ
+===================================================== */
+
+function openScoreScreen(){
+
+    showScreen(scoreScreen);
+
+
+    /*
+        Старый общий счёт
+    */
+
+    const oldGirls =
+        girlsScore - girlsRoundScore;
+
+    const oldBoys =
+        boysScore - boysRoundScore;
+
+
+    /*
+        Сколько заработано
+        именно в этом большом вопросе.
+    */
+
+    const girlsRound =
+        girlsRoundScore;
+
+    const boysRound =
+        boysRoundScore;
+
+
+    /*
+        Новый общий счёт.
+    */
+
+    /* Очки уже начислялись в реальном времени
+       после каждого правильного мини-вопроса. */
+    const newGirls = girlsScore;
+    const newBoys = boysScore;
+
+
+    /*
+        Пока показываем старые цифры.
+    */
+
+    girlsScoreElement.textContent =
+        oldGirls;
+
+    boysScoreElement.textContent =
+        oldBoys;
+
+
+    /*
+        Убираем победные стили.
+    */
+
+    girlsCard.classList.remove("winner");
+    boysCard.classList.remove("winner");
+
+
+    /*
+        Прячем кнопку ДАЛЬШЕ
+        до окончания анимации.
+    */
+
+    nextBtn.style.opacity="0";
+    nextBtn.style.transform="translateY(30px)";
+
+
+    /*
+        Показываем заработок
+        текущего раунда.
+    */
+
+    girlsGain.textContent =
+        `+${girlsRound}`;
+
+    boysGain.textContent =
+        `+${boysRound}`;
+
+
+    scoreMessage.textContent =
+        "РАУНД ЗАВЕРШЁН";
+
+
+    scoreRound.textContent =
+        `ВОПРОС ${questions[currentQuestion].id} ИЗ ${questions.length}`;
+
+
+    /*
+        Анимация карточек
+    */
+
+    gsap.fromTo(
+        ".team-card",
+        {
+            opacity:0,
+            y:45,
+            scale:.9
+        },
+        {
+            opacity:1,
+            y:0,
+            scale:1,
+            duration:.65,
+            stagger:.1,
+            ease:"back.out(1.4)"
+        }
+    );
+
+
+    /*
+        Заголовок
+    */
+
+    gsap.fromTo(
+        ".score-title",
+        {
+            opacity:0,
+            y:-15
+        },
+        {
+            opacity:1,
+            y:0,
+            duration:.4
+        }
+    );
+
+
+    gsap.fromTo(
+        ".score-message",
+        {
+            opacity:0,
+            scale:.65
+        },
+        {
+            opacity:1,
+            scale:1,
+            duration:.7,
+            ease:"back.out(1.8)"
+        }
+    );
+
+
+    /*
+        Анимация общего счёта.
+
+        Например:
+        было 300
+        стало 600
+    */
+
+    animateScore(
+        girlsScoreElement,
+        oldGirls,
+        newGirls
+    );
+
+
+    animateScore(
+        boysScoreElement,
+        oldBoys,
+        newBoys
+    );
+
+
+    /*
+        Показываем заработанные
+        баллы раунда.
+    */
+
+    if(girlsRound>0){
+
+        gsap.fromTo(
+            girlsGain,
+            {
+                opacity:0,
+                y:40,
+                scale:.5
+            },
+            {
+                opacity:1,
+                y:-20,
+                scale:1.15,
+                duration:.65,
+                ease:"back.out(1.8)",
+
+                onComplete:()=>{
+
+                    gsap.to(
+                        girlsGain,
+                        {
+                            opacity:0,
+                            y:-70,
+                            duration:.6
+                        }
+                    );
+                }
+            }
+        );
+
+    }
+
+
+    if(boysRound>0){
+
+        gsap.fromTo(
+            boysGain,
+            {
+                opacity:0,
+                y:40,
+                scale:.5
+            },
+            {
+                opacity:1,
+                y:-20,
+                scale:1.15,
+                duration:.65,
+                ease:"back.out(1.8)",
+
+                onComplete:()=>{
+
+                    gsap.to(
+                        boysGain,
+                        {
+                            opacity:0,
+                            y:-70,
+                            duration:.6
+                        }
+                    );
+                }
+            }
+        );
+
+    }
+
+
+    /*
+        Подсветка команд,
+        которые заработали очки.
+    */
+
+    if(girlsRound>0){
+
+        girlsCard.classList.add("winner");
+
+    }
+
+    if(boysRound>0){
+
+        boysCard.classList.add("winner");
+
+    }
+
+
+    /*
+        SUNBURST ЭФФЕКТ,
+        если в раунде кто-то заработал.
+    */
+
+    if(
+        girlsRound>0 ||
+        boysRound>0
+    ){
+
+        /* Показываем sunburst эффект вместо салюта */
+        document.getElementById("sunburstBackground").style.display="block";
+
+        startSound();
+
+    }
+
+
+    /*
+        ВАЖНО:
+
+        После появления табло
+        ДАЛЬШЕ всё равно требует
+        РУЧНОГО НАЖАТИЯ.
+
+        Автоматического перехода нет.
+    */
+
+    gsap.to(
+        nextBtn,
+        {
+            opacity:1,
+            y:0,
+            duration:.6,
+            delay:1.15,
+            ease:"back.out(1.4)"
+        }
+    );
+
+
+    /*
+        Только после фиксации
+        результата раунда обновляем
+        общий счёт.
+    */
+
+    girlsScore =
+        newGirls;
+
+    boysScore =
+        newBoys;
+
+}
+
+
+/* =====================================================
+   АНИМАЦИЯ ЦИФР
+===================================================== */
+
+function animateScore(
+    element,
+    from,
+    to
+){
+
+    const counter={
+        value:from
+    };
+
+
+    gsap.to(
+        counter,
+        {
+            value:to,
+
+            duration:1.65,
+
+            ease:"power4.out",
+
+            onUpdate:()=>{
+
+                element.textContent =
+                    Math.round(
+                        counter.value
+                    );
+
+            }
+        }
+    );
+}
+
+
+/* =====================================================
+   ЗОЛОТОЙ САЛЮТ
+===================================================== */
+
+function goldConfetti(){
+
+    if(
+        typeof confetti!=="function"
+    ){
+        return;
+    }
+
+
+    const options={
+
+        spread:75,
+
+        startVelocity:45,
+
+        ticks:180,
+
+        gravity:.9,
+
+        scalar:1.1,
+
+        colors:[
+            "#FFD700",
+            "#FFF2A6",
+            "#FFFFFF",
+            "#D4A900"
+        ]
+    };
+
+
+    confetti({
+        ...options,
+
+        particleCount:100,
+
+        origin:{
+            x:.12,
+            y:.55
+        }
+    });
+
+
+    confetti({
+        ...options,
+
+        particleCount:100,
+
+        origin:{
+            x:.88,
+            y:.55
+        }
+    });
+
+
+    setTimeout(
+        ()=>{
+
+            confetti({
+                ...options,
+
+                particleCount:90,
+
+                spread:120,
+
+                origin:{
+                    x:.5,
+                    y:.35
+                }
+            });
+
+        },
+        250
+    );
+}
+
+
+/* =====================================================
+   ДАЛЬШЕ
+===================================================== */
+
+nextBtn.addEventListener(
+    "click",
+    ()=>{
+
+        /*
+            Этот обработчик работает
+            ТОЛЬКО с экрана табло.
+        */
+
+        currentQuestion++;
+
+        /* Следующий большой вопрос получает следующий фон.
+           Внутри этапов фон НЕ меняется. */
+        updateRoundBackground(currentQuestion);
+
+
+        /*
+            Последний большой вопрос
+            закончился.
+        */
+
+        if(
+            currentQuestion >=
+            questions.length
+        ){
+
+            showFinal();
+
+            return;
+        }
+
+
+        /*
+            Новый большой вопрос.
+
+            Этап снова первый.
+        */
+
+        currentStep=0;
+
+
+        /*
+            КОРЗИНА НОВОГО РАУНДА
+        */
+
+        girlsRoundScore=0;
+        boysRoundScore=0;
+
+
+        /*
+            Очередность ходов:
+
+            Девочки → Мальчики
+            Мальчики → Девочки
+        */
+
+        activeTeam =
+            activeTeam==="girls"
+                ? "boys"
+                : "girls";
+
+
+        /*
+            Переходим на вопрос.
+        */
+
+        /* Скрыть sunburst при переходе */
+        document.getElementById("sunburstBackground").style.display="none";
+
+        showScreen(questionScreen);
+
+        loadQuestion();
+
+    }
+);
+
+
+/* =====================================================
+   ФИНАЛ
+===================================================== */
+
+function showFinal(){
+
+    /* Скрыть sunburst при переходе на финал */
+    document.getElementById("sunburstBackground").style.display="none";
+
+    showScreen(finishScreen);
+
+
+    document.getElementById(
+        "finalGirls"
+    ).textContent =
+        girlsScore;
+
+
+    document.getElementById(
+        "finalBoys"
+    ).textContent =
+        boysScore;
+
+
+    /* Определение победителя */
+    let winnerText = "";
+    if (girlsScore > boysScore) {
+        winnerText = "Команда ДЕВОЧКИ победила!";
+    } else if (boysScore > girlsScore) {
+        winnerText = "Команда МАЛЬЧИКИ победила!";
+    } else {
+        winnerText = "НИЧЬЯ!";
+    }
+
+    document.getElementById("finalWinner").textContent = winnerText;
+
+
+    gsap.fromTo(
+        ".trophy",
+        {
+            opacity:0,
+            scale:.2,
+            rotation:-25
+        },
+        {
+            opacity:1,
+            scale:1,
+            rotation:0,
+            duration:1,
+            ease:"back.out(2)"
+        }
+    );
+
+
+    gsap.fromTo(
+        ".final-title",
+        {
+            opacity:0,
+            y:35
+        },
+        {
+            opacity:1,
+            y:0,
+            duration:.8,
+            delay:.2
+        }
+    );
+
+
+    gsap.fromTo(
+        ".final-winner",
+        {
+            opacity:0,
+            scale:.8
+        },
+        {
+            opacity:1,
+            scale:1,
+            duration:.7,
+            delay:.3,
+            ease:"back.out(1.5)"
+        }
+    );
+
+
+    gsap.fromTo(
+        ".final-subtitle",
+        {
+            opacity:0
+        },
+        {
+            opacity:1,
+            duration:.6,
+            delay:.4
+        }
+    );
+
+
+    gsap.fromTo(
+        ".final-scores",
+        {
+            opacity:0,
+            y:30
+        },
+        {
+            opacity:1,
+            y:0,
+            duration:.7,
+            delay:.55
+        }
+    );
+
+
+    gsap.fromTo(
+        ".restart-btn",
+        {
+            opacity:0,
+            y:25
+        },
+        {
+            opacity:1,
+            y:0,
+            duration:.6,
+            delay:.8
+        }
+    );
+
+
+    /* Запуск салюта после появления экрана победы */
+    drawFireworks();
+
+
+    /* Воспроизведение звука победы */
+    try {
+        const winAudio = new Audio("вау.mp3");
+        winAudio.play().catch(error => {
+            console.log("Ошибка воспроизведения звука:", error);
+        });
+    } catch (error) {
+        console.log("Ошибка создания аудио:", error);
+    }
+}
+
+
+/* =====================================================
+   НАЧАТЬ ЗАНОВО
+===================================================== */
+
+document
+    .getElementById("restartBtn")
+    .addEventListener(
+        "click",
+        ()=>{
+
+            currentQuestion=0;
+            currentStep=0;
+
+            activeTeam=null;
+
+            girlsScore=0;
+            boysScore=0;
+
+            girlsRoundScore=0;
+            boysRoundScore=0;
+
+
+            girlsScoreElement.textContent="0";
+            boysScoreElement.textContent="0";
+
+            updateRoundBackground(0);
+            liveScorePanel.style.display="flex";
+            liveScoreReopen.style.display="none";
+            updateLiveScoreboard();
+
+            /* Скрыть sunburst при рестарте */
+            document.getElementById("sunburstBackground").style.display="none";
+
+
+            girlsCard.classList.remove(
+                "winner"
+            );
+
+            boysCard.classList.remove(
+                "winner"
+            );
+
+
+            showScreen(
+                startScreen
+            );
+
+
+            gsap.fromTo(
+                startScreen,
+                {
+                    opacity:0,
+                    scale:.97
+                },
+                {
+                    opacity:1,
+                    scale:1,
+                    duration:.6
+                }
+            );
+
+        }
+    );
+
+
+/* =====================================================
+   CANVAS ГЕОМЕТРИИ
+===================================================== */
+
+function resizeGeometryCanvas(){
+
+    const rect =
+        geometryCanvas.getBoundingClientRect();
+
+
+    const dpr =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+
+    geometryCanvas.width =
+        Math.round(
+            rect.width*dpr
+        );
+
+
+    geometryCanvas.height =
+        Math.round(
+            rect.height*dpr
+        );
+
+
+    const ctx =
+        geometryCanvas.getContext("2d");
+
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+}
+
+
+/*
+    Главная функция.
+
+    showLabels = false
+        ЧИСТЫЙ ЧЕРТЁЖ.
+
+    showLabels = true
+        ЧЕРТЁЖ + ПОДПИСИ.
+*/
+
+function drawGeometry(
+    type,
+    showLabels=false
+){
+
+    const rect =
+        geometryCanvas.getBoundingClientRect();
+
+
+    const width =
+        rect.width;
+
+    const height =
+        rect.height;
+
+
+    const ctx =
+        geometryCanvas.getContext("2d");
+
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    ctx.lineCap="round";
+    ctx.lineJoin="round";
+
+
+    if(type==="angles"){
+
+        drawAngles(
+            ctx,
+            width,
+            height,
+            showLabels
+        );
+
+    }
+
+
+    if(type==="lines"){
+
+        drawLines(
+            ctx,
+            width,
+            height,
+            showLabels
+        );
+
+    }
+}
+
+
+/* =====================================================
+   УГЛЫ
+===================================================== */
+
+function drawAngles(
+    ctx,
+    w,
+    h,
+    showLabels
+){
+
+    const gold="#FFD700";
+
+
+    ctx.strokeStyle=gold;
+    ctx.fillStyle=gold;
+
+    ctx.lineWidth=4;
+
+
+    /*
+        СЕТКА
+    */
+
+    ctx.save();
+
+    ctx.globalAlpha=.08;
+
+    ctx.lineWidth=1;
+
+
+    for(
+        let x=0;
+        x<w;
+        x+=40
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            0
+        );
+
+        ctx.lineTo(
+            x,
+            h
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    for(
+        let y=0;
+        y<h;
+        y+=40
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            w,
+            y
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    ctx.restore();
+
+
+    const positions=[
+        w*.22,
+        w*.50,
+        w*.78
+    ];
+
+
+    /*
+        ПРЯМОЙ
+    */
+
+    drawAngle(
+        ctx,
+        positions[0],
+        h*.45,
+        90
+    );
+
+
+    /*
+        ОСТРЫЙ
+    */
+
+    drawAngle(
+        ctx,
+        positions[1],
+        h*.45,
+        35
+    );
+
+
+    /*
+        ТУПОЙ
+    */
+
+    drawAngle(
+        ctx,
+        positions[2],
+        h*.45,
+        125
+    );
+
+
+    /*
+        Номера фигур
+    */
+    drawFigureNumber(ctx, positions[0] - 50, h*.45, "1)");
+    drawFigureNumber(ctx, positions[1] - 50, h*.45, "2)");
+    drawFigureNumber(ctx, positions[2] - 50, h*.45, "3)");
+
+
+    /*
+        Подписей под фигурами НЕТ.
+        Canvas показывает только чистый чертёж.
+    */
+}
+
+
+/* =====================================================
+   ОДИН УГОЛ
+===================================================== */
+
+function drawAngle(
+    ctx,
+    x,
+    y,
+    angle
+){
+
+    const length=65;
+
+
+    const a1 =
+        (180-angle) *
+        Math.PI /
+        180;
+
+
+    const a2=0;
+
+
+    const x1 =
+        x+
+        Math.cos(a1)*
+        length;
+
+
+    const y1 =
+        y-
+        Math.sin(a1)*
+        length;
+
+
+    const x2 =
+        x+
+        Math.cos(a2)*
+        length;
+
+
+    const y2 =
+        y-
+        Math.sin(a2)*
+        length;
+
+
+    ctx.strokeStyle="#FFD700";
+    ctx.lineWidth=4;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x1,
+        y1
+    );
+
+    ctx.lineTo(
+        x,
+        y
+    );
+
+    ctx.lineTo(
+        x2,
+        y2
+    );
+
+    ctx.stroke();
+
+
+    /*
+        ДУГА
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        24,
+        -Math.PI/2,
+        -Math.PI/2+
+        angle*Math.PI/180
+    );
+
+    ctx.stroke();
+
+
+    drawPoint(
+        ctx,
+        x,
+        y
+    );
+}
+
+
+/* =====================================================
+   ЛИНИИ
+===================================================== */
+
+function drawLines(
+    ctx,
+    w,
+    h,
+    showLabels
+){
+
+    const gold="#FFD700";
+
+
+    ctx.strokeStyle=gold;
+    ctx.fillStyle=gold;
+
+    ctx.lineWidth=4;
+
+
+    /*
+        СЕТКА
+    */
+
+    ctx.save();
+
+    ctx.globalAlpha=.07;
+
+    ctx.lineWidth=1;
+
+
+    for(
+        let x=0;
+        x<w;
+        x+=40
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            0
+        );
+
+        ctx.lineTo(
+            x,
+            h
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    for(
+        let y=0;
+        y<h;
+        y+=40
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            w,
+            y
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    ctx.restore();
+
+
+    const left=w*.10;
+    const right=w*.90;
+
+
+    /*
+        ОТРЕЗОК
+    */
+
+    let y=h*.16;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        left,
+        y
+    );
+
+    ctx.lineTo(
+        right,
+        y
+    );
+
+    ctx.stroke();
+
+
+    drawPoint(
+        ctx,
+        left,
+        y
+    );
+
+
+    drawPoint(
+        ctx,
+        right,
+        y
+    );
+
+    drawFigureNumber(ctx, left - 35, y, "1)");
+
+
+    /*
+        ЛУЧ
+    */
+
+    y=h*.38;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        left,
+        y
+    );
+
+    ctx.lineTo(
+        right,
+        y
+    );
+
+    ctx.stroke();
+
+
+    drawPoint(
+        ctx,
+        left,
+        y
+    );
+
+    drawFigureNumber(ctx, left - 35, y, "2)");
+
+
+    /*
+    /* ПРЯМАЯ */
+
+y = h * .60;
+
+ctx.beginPath();
+
+ctx.moveTo(
+    100, // Сдвигаем начало линии вправо, чтобы не перекрывать номер "3)"
+    y
+);
+
+ctx.lineTo(
+    w - 25, // Конец линии справа
+    y
+);
+
+ctx.stroke();
+
+// Текст "3)" пишется в левом углу (X = 25) и больше не перекрывается линией
+drawFigureNumber(ctx, 25, y, "3)");
+    /*
+        ЛОМАНАЯ
+    */
+
+    y=h*.80;
+
+
+    const points=[
+        [w*.10,y],
+        [w*.28,y-42],
+        [w*.47,y+5],
+        [w*.67,y-50],
+        [w*.90,y]
+    ];
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        points[0][0],
+        points[0][1]
+    );
+
+
+    for(
+        let i=1;
+        i<points.length;
+        i++
+    ){
+
+        ctx.lineTo(
+            points[i][0],
+            points[i][1]
+        );
+
+    }
+
+
+    ctx.stroke();
+
+
+    points.forEach(
+        point=>{
+
+            drawPoint(
+                ctx,
+                point[0],
+                point[1]
+            );
+
+        }
+    );
+
+    drawFigureNumber(ctx, w*.10 - 35, h*.80, "4)");
+
+
+    /* Чистый чертёж без подписей. */
+}
+
+
+/* =====================================================
+   ТОЧКА
+===================================================== */
+
+function drawPoint(
+    ctx,
+    x,
+    y
+){
+
+    ctx.fillStyle="#FFD700";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        6,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        12,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.strokeStyle=
+        "rgba(255,215,0,.25)";
+
+    ctx.lineWidth=2;
+
+    ctx.stroke();
+
+
+    ctx.strokeStyle="#FFD700";
+    ctx.lineWidth=4;
+}
+
+
+/* =====================================================
+   СТРЕЛКА
+===================================================== */
+
+function drawArrow(
+    ctx,
+    x,
+    y,
+    direction=0
+){
+
+    const size=13;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        x,
+        y
+    );
+
+
+    ctx.rotate(
+        direction
+    );
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        0
+    );
+
+    ctx.lineTo(
+        -size,
+        -size/2
+    );
+
+    ctx.lineTo(
+        -size,
+        size/2
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.restore();
+}
+
+
+/* =====================================================
+   НОМЕР ФИГУРЫ
+===================================================== */
+
+function drawFigureNumber(
+    ctx,
+    x,
+    y,
+    number
+){
+
+    ctx.save();
+
+    ctx.font="900 18px Arial";
+    ctx.fillStyle="#FFD700";
+    ctx.textAlign="right";
+    ctx.textBaseline="middle";
+
+    ctx.fillText(number, x, y);
+
+    ctx.restore();
+}
+
+
+/* =====================================================
+   ПОДПИСЬ CANVAS
+===================================================== */
+
+function drawLabel(
+    ctx,
+    text,
+    x,
+    y
+){
+
+    ctx.save();
+
+
+    ctx.font=
+        "900 14px Arial";
+
+
+    ctx.textAlign="center";
+
+
+    ctx.fillStyle="#FFD700";
+
+
+    ctx.shadowColor=
+        "rgba(255,215,0,.65)";
+
+
+    ctx.shadowBlur=12;
+
+
+    ctx.fillText(
+        text,
+        x,
+        y
+    );
+
+
+    ctx.restore();
+}
+
+
+/* =====================================================
+   ФОНОВЫЕ ЧАСТИЦЫ CANVAS
+===================================================== */
+
+const particlesCanvas =
+    document.getElementById(
+        "particlesCanvas"
+    );
+
+
+const pctx =
+    particlesCanvas.getContext("2d");
+
+
+let particles=[];
+
+
+function resizeParticleCanvas(){
+
+    const dpr =
+        Math.min(
+            window.devicePixelRatio||1,
+            2
+        );
+
+
+    particlesCanvas.width =
+        Math.round(
+            window.innerWidth*dpr
+        );
+
+
+    particlesCanvas.height =
+        Math.round(
+            window.innerHeight*dpr
+        );
+
+
+    particlesCanvas.style.width =
+        window.innerWidth+"px";
+
+
+    particlesCanvas.style.height =
+        window.innerHeight+"px";
+
+
+    pctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+
+    createBackgroundParticles();
+}
+
+
+function createBackgroundParticles(){
+
+    particles=[];
+
+
+    const count =
+        Math.min(
+            65,
+            Math.floor(
+                window.innerWidth/20
+            )
+        );
+
+
+    for(
+        let i=0;
+        i<count;
+        i++
+    ){
+
+        particles.push({
+
+            x:
+                Math.random()*
+                window.innerWidth,
+
+            y:
+                Math.random()*
+                window.innerHeight,
+
+            vx:
+                (Math.random()-.5)*
+                .18,
+
+            vy:
+                -.05-
+                Math.random()*.18,
+
+            radius:
+                .7+
+                Math.random()*1.8,
+
+            alpha:
+                .15+
+                Math.random()*.45,
+
+            pulse:
+                Math.random()*
+                Math.PI*2
+
+        });
+
+    }
+}
+
+
+function animateBackground(){
+
+    pctx.clearRect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+    );
+
+
+    const now =
+        performance.now()*.001;
+
+
+    /*
+        ЗОЛОТЫЕ ТОЧКИ
+    */
+
+    particles.forEach(
+        particle=>{
+
+            particle.x +=
+                particle.vx;
+
+            particle.y +=
+                particle.vy;
+
+            particle.pulse +=
+                .012;
+
+
+            if(
+                particle.y < -20
+            ){
+
+                particle.y =
+                    window.innerHeight+20;
+
+            }
+
+
+            if(
+                particle.x < -20
+            ){
+
+                particle.x =
+                    window.innerWidth+20;
+
+            }
+
+
+            if(
+                particle.x >
+                window.innerWidth+20
+            ){
+
+                particle.x=-20;
+
+            }
+
+
+            const pulse =
+                particle.alpha+
+                Math.sin(
+                    particle.pulse
+                )*.10;
+
+
+            pctx.beginPath();
+
+
+            pctx.arc(
+                particle.x,
+                particle.y,
+                particle.radius,
+                0,
+                Math.PI*2
+            );
+
+
+            pctx.fillStyle =
+                `rgba(
+                    255,
+                    215,
+                    0,
+                    ${Math.max(.03,pulse)}
+                )`;
+
+
+            pctx.shadowColor =
+                "rgba(255,215,0,.8)";
+
+
+            pctx.shadowBlur=10;
+
+
+            pctx.fill();
+
+
+            pctx.shadowBlur=0;
+
+        }
+    );
+
+
+    /*
+        СОЕДИНЯЮЩИЕ ЛИНИИ
+    */
+
+    for(
+        let i=0;
+        i<particles.length;
+        i++
+    ){
+
+        for(
+            let j=i+1;
+            j<particles.length;
+            j++
+        ){
+
+            const a=
+                particles[i];
+
+            const b=
+                particles[j];
+
+
+            const dx=
+                a.x-b.x;
+
+            const dy=
+                a.y-b.y;
+
+
+            const distance=
+                Math.sqrt(
+                    dx*dx+
+                    dy*dy
+                );
+
+
+            if(
+                distance<135
+            ){
+
+                const opacity =
+                    (1-
+                    distance/135)*
+                    .12;
+
+
+                pctx.beginPath();
+
+
+                pctx.moveTo(
+                    a.x,
+                    a.y
+                );
+
+
+                pctx.lineTo(
+                    b.x,
+                    b.y
+                );
+
+
+                pctx.strokeStyle =
+                    `rgba(
+                        255,
+                        215,
+                        0,
+                        ${opacity}
+                    )`;
+
+
+                pctx.lineWidth=.7;
+
+
+                pctx.stroke();
+
+            }
+
+        }
+
+    }
+
+
+    /*
+        ПЛАВАЮЩИЕ ГЕОМЕТРИЧЕСКИЕ ФИГУРЫ
+    */
+
+    drawFloatingGeometry(now);
+
+
+    requestAnimationFrame(
+        animateBackground
+    );
+}
+
+
+/* =====================================================
+   ПЛАВАЮЩИЕ ГЕОМЕТРИЧЕСКИЕ ФИГУРЫ
+===================================================== */
+
+function drawFloatingGeometry(
+    time
+){
+
+    pctx.save();
+
+
+    pctx.globalAlpha=.035;
+
+
+    pctx.strokeStyle="#FFD700";
+
+
+    pctx.lineWidth=1;
+
+
+    const positions=[
+
+        {
+            x:window.innerWidth*.12,
+            y:window.innerHeight*.25,
+            size:85
+        },
+
+        {
+            x:window.innerWidth*.88,
+            y:window.innerHeight*.30,
+            size:105
+        },
+
+        {
+            x:window.innerWidth*.18,
+            y:window.innerHeight*.82,
+            size:70
+        },
+
+        {
+            x:window.innerWidth*.82,
+            y:window.innerHeight*.78,
+            size:90
+        }
+
+    ];
+
+
+    positions.forEach(
+        (item,index)=>{
+
+            const rotation =
+                time*
+                (.08+
+                index*.015);
+
+
+            pctx.save();
+
+
+            pctx.translate(
+                item.x,
+                item.y
+            );
+
+
+            pctx.rotate(
+                rotation
+            );
+
+
+            pctx.beginPath();
+
+
+            for(
+                let i=0;
+                i<6;
+                i++
+            ){
+
+                const angle =
+                    i*Math.PI/3;
+
+
+                const x =
+                    Math.cos(angle)*
+                    item.size;
+
+
+                const y =
+                    Math.sin(angle)*
+                    item.size;
+
+
+                if(i===0){
+
+                    pctx.moveTo(
+                        x,
+                        y
+                    );
+
+                }else{
+
+                    pctx.lineTo(
+                        x,
+                        y
+                    );
+
+                }
+
+            }
+
+
+            pctx.closePath();
+
+
+            pctx.stroke();
+
+
+            pctx.restore();
+
+        }
+    );
+
+
+    pctx.restore();
+}
+
+
+/* =====================================================
+   RESIZE
+===================================================== */
+
+window.addEventListener(
+    "resize",
+    ()=>{
+
+        resizeParticleCanvas();
+
+
+        if(
+            questions[currentQuestion] &&
+            questions[currentQuestion].geometry
+        ){
+
+            resizeGeometryCanvas();
+
+
+            /*
+                ВАЖНО:
+
+                При resize сохраняем
+                состояние подписей.
+
+                Если ответ ещё НЕ показан —
+                подписи НЕ появляются.
+            */
+
+            drawGeometry(
+                questions[currentQuestion].geometry,
+                answerShown
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+const fullscreenButton =
+    document.createElement("button");
+
+
+fullscreenButton.className =
+    "fullscreen-btn";
+
+
+fullscreenButton.textContent =
+    "□";
+
+
+fullscreenButton.title =
+    "Полный экран";
+
+
+document.body.appendChild(
+    fullscreenButton
+);
+
+
+fullscreenButton.addEventListener(
+    "click",
+    async()=>{
+
+        try{
+
+            if(
+                !document.fullscreenElement
+            ){
+
+                await document
+                    .documentElement
+                    .requestFullscreen();
+
+            }else{
+
+                await document
+                    .exitFullscreen();
+
+            }
+
+        }catch(error){
+
+            console.log(error);
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   КЛАВИАТУРА
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    event=>{
+
+        /*
+            F = fullscreen
+        */
+
+        if(
+            event.key.toLowerCase()==="f"
+        ){
+
+            fullscreenButton.click();
+
+            return;
+
+        }
+
+
+        /*
+            Enter / Space
+
+            На вопросе:
+            только ПОКАЗАТЬ ОТВЕТ.
+
+            НЕЛЬЗЯ автоматически выбрать ✓.
+        */
+
+        if(
+            event.key==="Enter" ||
+            event.code==="Space"
+        ){
+
+            const active =
+                document.querySelector(
+                    ".screen.active"
+                );
+
+
+            if(
+                active===questionScreen
+            ){
+
+                if(
+                    !answerShown
+                ){
+
+                    showAnswerBtn.click();
+
+                }
+
+                return;
+
+            }
+
+
+            /*
+                На табло:
+                Enter / Space = ДАЛЬШЕ.
+            */
+
+            if(
+                active===scoreScreen
+            ){
+
+                nextBtn.click();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   ПЕРВОНАЧАЛЬНЫЙ ФОН
+===================================================== */
+
+updateRoundBackground(0);
+
+
+/* =====================================================
+   ЗАПУСК CANVAS-ФОНА
+===================================================== */
+
+resizeParticleCanvas();
+
+animateBackground();
+/* =====================================================
+ /* =====================================================
+   САЛЮТ НА ЭКРАНЕ ПОБЕДЫ
+===================================================== */
+
+function drawFireworks(){
+
+    const finishScreen =
+        document.getElementById("finishScreen");
+
+    if(!finishScreen){
+        console.error("Салют: #finishScreen не найден");
+        return;
+    }
+
+    /* Удаляем старый салют, если он остался */
+    const oldCanvas =
+        finishScreen.querySelector(".fireworks-canvas");
+
+    if(oldCanvas){
+        oldCanvas.remove();
+    }
+
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.className = "fireworks-canvas";
+
+    const ctx =
+        canvas.getContext("2d");
+
+    if(!ctx){
+        return;
+    }
+
+
+    /* =====================================================
+       РАЗМЕР CANVAS
+    ===================================================== */
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    function resize(){
+
+        const dpr =
+            Math.min(window.devicePixelRatio || 1, 2);
+
+        width = window.innerWidth;
+        height = window.innerHeight;
+
+        canvas.width =
+            Math.round(width * dpr);
+
+        canvas.height =
+            Math.round(height * dpr);
+
+        canvas.style.width =
+            width + "px";
+
+        canvas.style.height =
+            height + "px";
+
+        ctx.setTransform(
+            dpr,
+            0,
+            0,
+            dpr,
+            0,
+            0
+        );
+    }
+
+
+    /* =====================================================
+       ПОЗИЦИЯ CANVAS
+    ===================================================== */
+
+    canvas.style.position = "fixed";
+    canvas.style.inset = "0";
+    canvas.style.width = "100vw";
+    canvas.style.height = "100vh";
+    canvas.style.pointerEvents = "none";
+
+    /*
+       Очень высокий z-index,
+       чтобы салют был поверх экрана победы.
+    */
+    canvas.style.zIndex = "99999";
+
+    finishScreen.appendChild(canvas);
+
+    resize();
+
+    window.addEventListener(
+        "resize",
+        resize
+    );
+
+
+    /* =====================================================
+       МАССИВЫ
+    ===================================================== */
+
+    const rockets = [];
+    const particles = [];
+
+
+    /* =====================================================
+       ЦВЕТА САЛЮТА
+    ===================================================== */
+
+    const colors = [
+
+        "#FFD700", // золотой
+        "#00F5D4", // бирюзовый
+        "#FF007F", // розовый
+        "#FFFFFF", // белый
+        "#7C4DFF", // фиолетовый
+        "#00BFFF"  // голубой
+
+    ];
+
+
+    /* =====================================================
+       ЧАСТИЦА ВЗРЫВА
+    ===================================================== */
+
+    class Particle{
+
+        constructor(x, y, color){
+
+            this.x = x;
+            this.y = y;
+
+            this.color = color;
+
+            this.radius =
+                Math.random() * 2.5 + 1.5;
+
+
+            const angle =
+                Math.random() *
+                Math.PI *
+                2;
+
+
+            const speed =
+                Math.random() * 6 + 3;
+
+
+            this.vx =
+                Math.cos(angle) * speed;
+
+            this.vy =
+                Math.sin(angle) * speed;
+
+
+            this.gravity = 0.065;
+
+            this.friction = 0.965;
+
+            this.alpha = 1;
+
+
+            this.decay =
+                Math.random() * 0.012 + 0.008;
+        }
+
+
+        update(){
+
+            this.vx *= this.friction;
+
+            this.vy *= this.friction;
+
+            this.vy += this.gravity;
+
+
+            this.x += this.vx;
+
+            this.y += this.vy;
+
+
+            this.alpha -= this.decay;
+        }
+
+
+        draw(){
+
+            if(this.alpha <= 0){
+                return;
+            }
+
+
+            ctx.save();
+
+
+            ctx.globalAlpha =
+                this.alpha;
+
+            ctx.fillStyle =
+                this.color;
+
+
+            ctx.shadowBlur = 16;
+
+            ctx.shadowColor =
+                this.color;
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                this.x,
+                this.y,
+                this.radius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            ctx.restore();
+        }
+    }
+
+
+    /* =====================================================
+       РАКЕТА
+    ===================================================== */
+
+    class Rocket{
+
+        constructor(
+            targetX,
+            targetY,
+            color
+        ){
+
+            this.x =
+                width *
+                (
+                    0.25 +
+                    Math.random() * 0.5
+                );
+
+
+            this.y =
+                height + 10;
+
+
+            this.targetX =
+                targetX;
+
+            this.targetY =
+                targetY;
+
+            this.color =
+                color;
+
+
+            const angle =
+                Math.atan2(
+                    targetY - this.y,
+                    targetX - this.x
+                );
+
+
+            const speed =
+                12 +
+                Math.random() * 2;
+
+
+            this.vx =
+                Math.cos(angle) *
+                speed;
+
+            this.vy =
+                Math.sin(angle) *
+                speed;
+
+
+            this.exploded =
+                false;
+        }
+
+
+        update(){
+
+            this.x += this.vx;
+
+            this.y += this.vy;
+
+
+            /*
+               Достигли точки взрыва.
+            */
+
+            if(this.y <= this.targetY){
+
+                this.exploded = true;
+
+
+                createExplosion(
+                    this.targetX,
+                    this.targetY,
+                    this.color
+                );
+
+
+                playBoomSound();
+            }
+        }
+
+
+        draw(){
+
+            ctx.save();
+
+
+            ctx.fillStyle =
+                "#FFFFFF";
+
+
+            ctx.shadowBlur = 18;
+
+            ctx.shadowColor =
+                this.color;
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                this.x,
+                this.y,
+                3.5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            ctx.restore();
+        }
+    }
+
+
+    /* =====================================================
+       СОЗДАНИЕ ВЗРЫВА
+    ===================================================== */
+
+    function createExplosion(
+        x,
+        y,
+        color
+    ){
+
+        /*
+           Больше частиц = более мощный салют.
+        */
+
+        const count =
+            Math.floor(
+                Math.random() * 45
+            ) + 130;
+
+
+        for(
+            let i = 0;
+            i < count;
+            i++
+        ){
+
+            particles.push(
+                new Particle(
+                    x,
+                    y,
+                    color
+                )
+            );
+        }
+    }
+
+
+    /* =====================================================
+       ЗВУК САЛЮТА
+    ===================================================== */
+
+    function playBoomSound(){
+
+        try{
+
+            const boomAudio =
+                new Audio("бах.mp3");
+
+
+            boomAudio.volume =
+                0.5;
+
+
+            boomAudio.currentTime =
+                0;
+
+
+            boomAudio.play()
+                .catch(error => {
+
+                    console.log(
+                        "Браузер заблокировал звук:",
+                        error
+                    );
+
+                });
+
+        }
+        catch(error){
+
+            console.log(
+                "Ошибка аудио:",
+                error
+            );
+        }
+    }
+
+
+    /* =====================================================
+       ЗАПУСК РАКЕТЫ
+    ===================================================== */
+
+    function launch(
+        x,
+        y,
+        color,
+        delay
+    ){
+
+        setTimeout(() => {
+
+            /*
+               Если пользователь уже ушёл
+               с экрана победы — не запускаем.
+            */
+
+            if(
+                !finishScreen.classList.contains(
+                    "active"
+                )
+            ){
+
+                return;
+            }
+
+
+            rockets.push(
+                new Rocket(
+                    x,
+                    y,
+                    color
+                )
+            );
+
+        }, delay);
+    }
+
+
+    /* =====================================================
+       БОЛЬШАЯ СЕРИЯ САЛЮТОВ
+    ===================================================== */
+
+    launch(
+        width * 0.15,
+        height * 0.30,
+        colors[0],
+        100
+    );
+
+
+    launch(
+        width * 0.35,
+        height * 0.23,
+        colors[1],
+        400
+    );
+
+
+    launch(
+        width * 0.50,
+        height * 0.18,
+        colors[2],
+        700
+    );
+
+
+    launch(
+        width * 0.68,
+        height * 0.25,
+        colors[3],
+        1000
+    );
+
+
+    launch(
+        width * 0.85,
+        height * 0.30,
+        colors[4],
+        1300
+    );
+
+
+    launch(
+        width * 0.25,
+        height * 0.20,
+        colors[5],
+        1650
+    );
+
+
+    launch(
+        width * 0.50,
+        height * 0.32,
+        colors[0],
+        1950
+    );
+
+
+    launch(
+        width * 0.75,
+        height * 0.21,
+        colors[1],
+        2250
+    );
+
+
+    
+
+
+    launch(
+        width * 0.60,
+        height * 0.20,
+        colors[5],
+        3050
+    );
+
+
+    /* =====================================================
+       АНИМАЦИЯ
+    ===================================================== */
+
+    const startTime =
+        performance.now();
+
+
+    function animate(now){
+
+        /*
+           Полностью прозрачный Canvas.
+           Фон экрана победы остаётся видимым.
+        */
+
+        ctx.clearRect(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+        /* =================================================
+           РАКЕТЫ
+        ================================================= */
+
+        for(
+            let i = rockets.length - 1;
+            i >= 0;
+            i--
+        ){
+
+            const rocket =
+                rockets[i];
+
+
+            rocket.update();
+
+
+            if(
+                rocket.exploded
+            ){
+
+                rockets.splice(
+                    i,
+                    1
+                );
+
+            }
+            else{
+
+                rocket.draw();
+            }
+        }
+
+
+        /* =================================================
+           ЧАСТИЦЫ
+        ================================================= */
+
+        for(
+            let i = particles.length - 1;
+            i >= 0;
+            i--
+        ){
+
+            const particle =
+                particles[i];
+
+
+            particle.update();
+
+
+            if(
+                particle.alpha <= 0
+            ){
+
+                particles.splice(
+                    i,
+                    1
+                );
+
+            }
+            else{
+
+                particle.draw();
+            }
+        }
+
+
+        /* =================================================
+           ЗАВЕРШЕНИЕ САЛЮТА
+        ================================================= */
+
+        if(
+
+            rockets.length === 0 &&
+
+            particles.length === 0 &&
+
+            now - startTime > 7500
+
+        ){
+
+            window.removeEventListener(
+                "resize",
+                resize
+            );
+
+
+            canvas.remove();
+
+
+            return;
+        }
+
+
+        /*
+           Следующий кадр.
+           ВАЖНО: этот вызов только ОДИН.
+        */
+
+        requestAnimationFrame(
+            animate
+        );
+    }
+
+
+    /* =====================================================
+       ЗАПУСК АНИМАЦИИ
+    ===================================================== */
+
+    requestAnimationFrame(
+        animate
+    );
+}
+
+
+/* =====================================================
+   ДЛЯ ТЕСТА: БЫСТРЫЙ ПРОПУСК ВОПРОСОВ ПО КНОПКЕ "Ъ"
+===================================================== */
+window.addEventListener('keydown', function(event) {
+    // Проверяем клавишу "Ъ" (в русской раскладке) или "]" (в английской раскладке)
+    if (event.key === 'ъ' || event.key === 'Ъ' || event.key === ']') {
+        
+        // Ищем вашу кнопку "Далее" (на скриншоте это nextBtn)
+        // Если переменная nextBtn объявлена глобально, используем её. 
+        // Иначе пытаемся найти её в документе.
+        const btn = (typeof nextBtn !== 'undefined') ? nextBtn : document.querySelector('#nextBtn, .next-btn, button[id*="next"]');
+        
+        if (btn) {
+            console.log('Тест: Вопрос пропущен по клавише Ъ');
+            btn.click(); // Симулируем клик
+        } else {
+            console.warn('Тест: Кнопка "Далее" не найдена на текущем экране');
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>
